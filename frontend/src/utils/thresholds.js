@@ -1,25 +1,18 @@
 /**
  * Sensor threshold configuration.
- * Used for gauge coloring and alert triggers.
+ * Updated for 3-sensor hardware: Temperature (DHT11), MQ2, MQ7.
+ * MQ7 is a digital sensor (0 = safe, 1 = gas detected), so thresholds
+ * are set accordingly (warning at 1, danger at 1).
  */
 export const THRESHOLDS = {
   temperature: {
     unit: '°C',
     min: 0,
     max: 100,
-    warning: 45,
-    danger: 60,
+    warning: 35,
+    danger: 50,
     label: 'Temperature',
     icon: '🌡️',
-  },
-  humidity: {
-    unit: '%',
-    min: 0,
-    max: 100,
-    warning: 80,
-    danger: 95,
-    label: 'Humidity',
-    icon: '💧',
   },
   mq2: {
     unit: 'ppm',
@@ -27,26 +20,17 @@ export const THRESHOLDS = {
     max: 1000,
     warning: 300,
     danger: 500,
-    label: 'MQ2 (Smoke)',
+    label: 'MQ2 (Smoke/LPG)',
     icon: '💨',
   },
   mq7: {
-    unit: 'ppm',
+    unit: '',
     min: 0,
-    max: 500,
-    warning: 100,
-    danger: 200,
+    max: 1,
+    warning: 1,
+    danger: 1,
     label: 'MQ7 (CO)',
     icon: '☁️',
-  },
-  mq135: {
-    unit: 'ppm',
-    min: 0,
-    max: 800,
-    warning: 200,
-    danger: 400,
-    label: 'MQ135 (Air)',
-    icon: '🌬️',
   },
 };
 
@@ -73,15 +57,18 @@ export function getAlerts(data) {
   if (!data) return [];
   const alerts = [];
 
-  if (data.flame === true) {
+  // MQ7 digital: 1 = gas detected
+  if (data.mq7 === 1) {
     alerts.push({
-      type: 'flame',
-      message: '🔥 FIRE ALERT! Flame Detected!',
+      type: 'mq7',
+      message: '☁️ CO ALERT! MQ7 Gas Detected!',
       level: 'danger',
     });
   }
 
+  // Check all numeric sensor thresholds
   Object.keys(THRESHOLDS).forEach((key) => {
+    if (key === 'mq7') return; // Already handled above
     const status = getStatus(key, data[key]);
     if (status === 'danger') {
       alerts.push({

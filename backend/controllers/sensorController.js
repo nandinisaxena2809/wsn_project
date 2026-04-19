@@ -96,11 +96,8 @@ const sensorController = {
 
       const fields = [
         'temperature',
-        'humidity',
         'mq2',
         'mq7',
-        'mq135',
-        'flame',
         'createdAt',
       ];
 

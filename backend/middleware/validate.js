@@ -2,21 +2,19 @@ const Joi = require('joi');
 
 /**
  * Joi validation schema for incoming sensor data.
- * Enforces type and range constraints on all sensor fields.
+ * Only temperature, mq2, mq7 are required (matches partners' hardware).
+ * humidity, mq135, flame are optional — will use defaults if not sent.
  */
 const sensorDataSchema = Joi.object({
   temperature: Joi.number().min(-50).max(150).required()
     .messages({ 'any.required': 'Temperature is required' }),
-  humidity: Joi.number().min(0).max(100).required()
-    .messages({ 'any.required': 'Humidity is required' }),
+  humidity: Joi.number().min(0).max(100).optional().default(0),
   mq2: Joi.number().min(0).max(10000).required()
     .messages({ 'any.required': 'MQ2 reading is required' }),
   mq7: Joi.number().min(0).max(10000).required()
     .messages({ 'any.required': 'MQ7 reading is required' }),
-  mq135: Joi.number().min(0).max(10000).required()
-    .messages({ 'any.required': 'MQ135 reading is required' }),
-  flame: Joi.boolean().required()
-    .messages({ 'any.required': 'Flame status is required' }),
+  mq135: Joi.number().min(0).max(10000).optional().default(0),
+  flame: Joi.boolean().optional().default(false),
   timestamp: Joi.date().iso().optional(),
 });
 

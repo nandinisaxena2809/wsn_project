@@ -77,8 +77,8 @@ export default function SystemTab({ isConnected, latest, history, onRefresh }) {
               </span>
             </div>
             <div className="system-info-row">
-              <span className="info-label">Flame Events</span>
-              <span className="info-value">{history.filter(d => d.flame).length}</span>
+              <span className="info-label">Gas Events (MQ7)</span>
+              <span className="info-value">{history.filter(d => d.mq7 === 1).length}</span>
             </div>
           </div>
         </div>
@@ -96,7 +96,7 @@ export default function SystemTab({ isConnected, latest, history, onRefresh }) {
             </div>
             <div className="system-info-row">
               <span className="info-label">Sensors</span>
-              <span className="info-value">DHT11, MQ2, MQ7, MQ135, Flame</span>
+              <span className="info-value">DHT11, MQ2, MQ7</span>
             </div>
             <div className="system-info-row">
               <span className="info-label">Comm Protocol</span>
@@ -104,7 +104,7 @@ export default function SystemTab({ isConnected, latest, history, onRefresh }) {
             </div>
             <div className="system-info-row">
               <span className="info-label">Send Interval</span>
-              <span className="info-value">5 seconds</span>
+              <span className="info-value">2 seconds</span>
             </div>
           </div>
         </div>

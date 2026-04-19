@@ -4,6 +4,7 @@ import { THRESHOLDS, getStatus } from '../utils/thresholds';
 
 /**
  * Analytics tab — full-width charts, data table, and time range filters.
+ * Updated for 3-sensor hardware: Temperature, MQ2, MQ7.
  */
 export default function AnalyticsTab({ history }) {
   const [selectedSensor, setSelectedSensor] = useState('all');
@@ -27,7 +28,7 @@ export default function AnalyticsTab({ history }) {
   // Stats for selected data
   const stats = useMemo(() => {
     if (!filteredData.length) return null;
-    const keys = ['temperature', 'humidity', 'mq2', 'mq7', 'mq135'];
+    const keys = ['temperature', 'mq2', 'mq7'];
     const result = {};
     keys.forEach((key) => {
       const values = filteredData.map((d) => d[key]);
@@ -43,39 +44,25 @@ export default function AnalyticsTab({ history }) {
 
   const sensorOptions = [
     { value: 'all', label: 'All Sensors' },
-    { value: 'temp_hum', label: 'Temp & Humidity' },
-    { value: 'gas', label: 'Gas Levels' },
+    { value: 'gas', label: 'Gas Levels (MQ2 + MQ7)' },
     { value: 'temperature', label: 'Temperature Only' },
-    { value: 'humidity', label: 'Humidity Only' },
-    { value: 'mq2', label: 'MQ2 (Smoke)' },
+    { value: 'mq2', label: 'MQ2 (Smoke/LPG)' },
     { value: 'mq7', label: 'MQ7 (CO)' },
-    { value: 'mq135', label: 'MQ135 (Air)' },
   ];
 
   const chartConfigs = {
     all: [
       {
-        title: 'Temperature & Humidity',
+        title: 'Temperature',
         lines: [
           { key: 'temperature', name: 'Temperature (°C)', color: '#f97316' },
-          { key: 'humidity', name: 'Humidity (%)', color: '#3b82f6' },
         ],
       },
       {
         title: 'Gas Concentrations',
         lines: [
           { key: 'mq2', name: 'MQ2 - Smoke (ppm)', color: '#a855f7' },
-          { key: 'mq7', name: 'MQ7 - CO (ppm)', color: '#ec4899' },
-          { key: 'mq135', name: 'MQ135 - Air (ppm)', color: '#06b6d4' },
-        ],
-      },
-    ],
-    temp_hum: [
-      {
-        title: 'Temperature & Humidity Over Time',
-        lines: [
-          { key: 'temperature', name: 'Temperature (°C)', color: '#f97316' },
-          { key: 'humidity', name: 'Humidity (%)', color: '#3b82f6' },
+          { key: 'mq7', name: 'MQ7 - CO', color: '#ec4899' },
         ],
       },
     ],
@@ -84,16 +71,13 @@ export default function AnalyticsTab({ history }) {
         title: 'All Gas Sensors Over Time',
         lines: [
           { key: 'mq2', name: 'MQ2 - Smoke (ppm)', color: '#a855f7' },
-          { key: 'mq7', name: 'MQ7 - CO (ppm)', color: '#ec4899' },
-          { key: 'mq135', name: 'MQ135 - Air (ppm)', color: '#06b6d4' },
+          { key: 'mq7', name: 'MQ7 - CO', color: '#ec4899' },
         ],
       },
     ],
     temperature: [{ title: 'Temperature', lines: [{ key: 'temperature', name: 'Temperature (°C)', color: '#f97316' }] }],
-    humidity: [{ title: 'Humidity', lines: [{ key: 'humidity', name: 'Humidity (%)', color: '#3b82f6' }] }],
     mq2: [{ title: 'MQ2 - Smoke Detection', lines: [{ key: 'mq2', name: 'MQ2 (ppm)', color: '#a855f7' }] }],
-    mq7: [{ title: 'MQ7 - Carbon Monoxide', lines: [{ key: 'mq7', name: 'MQ7 (ppm)', color: '#ec4899' }] }],
-    mq135: [{ title: 'MQ135 - Air Quality', lines: [{ key: 'mq135', name: 'MQ135 (ppm)', color: '#06b6d4' }] }],
+    mq7: [{ title: 'MQ7 - Carbon Monoxide', lines: [{ key: 'mq7', name: 'MQ7', color: '#ec4899' }] }],
   };
 
   const charts = chartConfigs[selectedSensor] || chartConfigs.all;
@@ -197,35 +181,29 @@ export default function AnalyticsTab({ history }) {
               <tr>
                 <th>Time</th>
                 <th>Temp (°C)</th>
-                <th>Humidity (%)</th>
-                <th>MQ2</th>
-                <th>MQ7</th>
-                <th>MQ135</th>
-                <th>Flame</th>
+                <th>MQ2 (ppm)</th>
+                <th>MQ7 (CO)</th>
                 <th>Status</th>
               </tr>
             </thead>
             <tbody>
               {filteredData.slice(-20).reverse().map((row, i) => {
-                const worstStatus = ['temperature', 'humidity', 'mq2', 'mq7', 'mq135']
+                const worstStatus = ['temperature', 'mq2', 'mq7']
                   .reduce((worst, key) => {
                     const s = getStatus(key, row[key]);
                     if (s === 'danger') return 'danger';
                     if (s === 'warning' && worst !== 'danger') return 'warning';
                     return worst;
-                  }, row.flame ? 'danger' : 'safe');
+                  }, 'safe');
                 
                 return (
                   <tr key={i} className={`table-row-${worstStatus}`}>
                     <td>{new Date(row.createdAt).toLocaleTimeString()}</td>
                     <td>{row.temperature?.toFixed(1)}</td>
-                    <td>{row.humidity?.toFixed(1)}</td>
                     <td>{row.mq2}</td>
-                    <td>{row.mq7}</td>
-                    <td>{row.mq135}</td>
                     <td>
-                      <span className={`flame-badge ${row.flame ? 'active' : ''}`}>
-                        {row.flame ? '🔥 YES' : '✓ NO'}
+                      <span className={`flame-badge ${row.mq7 === 1 ? 'active' : ''}`}>
+                        {row.mq7 === 1 ? '⚠️ GAS' : '✓ Safe'}
                       </span>
                     </td>
                     <td>

@@ -3,6 +3,9 @@ const mongoose = require('mongoose');
 /**
  * Mongoose schema for sensor data readings.
  * Each document represents a single reading from the sensor array.
+ *
+ * Required fields: temperature, mq2, mq7 (what the hardware actually sends)
+ * Optional fields: humidity, mq135, flame (default to safe values if not available)
  */
 const sensorDataSchema = new mongoose.Schema(
   {
@@ -12,7 +15,7 @@ const sensorDataSchema = new mongoose.Schema(
     },
     humidity: {
       type: Number,
-      required: [true, 'Humidity reading is required'],
+      default: 0,
     },
     mq2: {
       type: Number,
@@ -24,11 +27,11 @@ const sensorDataSchema = new mongoose.Schema(
     },
     mq135: {
       type: Number,
-      required: [true, 'MQ135 (air quality) reading is required'],
+      default: 0,
     },
     flame: {
       type: Boolean,
-      required: [true, 'Flame detection status is required'],
+      default: false,
     },
   },
   {

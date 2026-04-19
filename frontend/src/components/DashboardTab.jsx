@@ -6,6 +6,7 @@ import { getAlerts } from '../utils/thresholds';
 
 /**
  * Dashboard tab — main overview with live data, gauges, and charts.
+ * Updated for 3-sensor hardware: Temperature (DHT11), MQ2, MQ7.
  */
 export default function DashboardTab({ latest, history }) {
   const alerts = getAlerts(latest);
@@ -15,13 +16,11 @@ export default function DashboardTab({ latest, history }) {
   const avgTemp = history.length
     ? (history.reduce((s, d) => s + d.temperature, 0) / history.length).toFixed(1)
     : '--';
-  const avgHum = history.length
-    ? (history.reduce((s, d) => s + d.humidity, 0) / history.length).toFixed(1)
+  const maxMQ2 = history.length
+    ? Math.max(...history.map((d) => d.mq2))
     : '--';
-  const maxGas = history.length
-    ? Math.max(...history.map((d) => Math.max(d.mq2, d.mq7, d.mq135)))
-    : '--';
-  const flameEvents = history.filter((d) => d.flame === true).length;
+  const gasEvents = history.filter((d) => d.mq7 === 1).length;
+  const totalReadings = history.length;
 
   return (
     <div className="tab-content dashboard-tab">
@@ -33,19 +32,19 @@ export default function DashboardTab({ latest, history }) {
           <div className="quick-stat-icon">🌡️</div>
         </div>
         <div className="quick-stat">
-          <div className="quick-stat-value">{avgHum}</div>
-          <div className="quick-stat-label">Avg Humidity (%)</div>
-          <div className="quick-stat-icon">💧</div>
-        </div>
-        <div className="quick-stat">
-          <div className="quick-stat-value">{maxGas}</div>
-          <div className="quick-stat-label">Peak Gas (ppm)</div>
+          <div className="quick-stat-value">{maxMQ2}</div>
+          <div className="quick-stat-label">Peak MQ2 (ppm)</div>
           <div className="quick-stat-icon">💨</div>
         </div>
         <div className="quick-stat">
-          <div className="quick-stat-value flame-stat">{flameEvents}</div>
-          <div className="quick-stat-label">Flame Events</div>
-          <div className="quick-stat-icon">🔥</div>
+          <div className="quick-stat-value flame-stat">{gasEvents}</div>
+          <div className="quick-stat-label">MQ7 Gas Events</div>
+          <div className="quick-stat-icon">☁️</div>
+        </div>
+        <div className="quick-stat">
+          <div className="quick-stat-value">{totalReadings}</div>
+          <div className="quick-stat-label">Total Readings</div>
+          <div className="quick-stat-icon">📡</div>
         </div>
       </div>
 
@@ -64,11 +63,8 @@ export default function DashboardTab({ latest, history }) {
         </div>
         <div className="live-cards-grid">
           <LiveDataCard sensorKey="temperature" value={latest?.temperature} />
-          <LiveDataCard sensorKey="humidity" value={latest?.humidity} />
           <LiveDataCard sensorKey="mq2" value={latest?.mq2} />
           <LiveDataCard sensorKey="mq7" value={latest?.mq7} />
-          <LiveDataCard sensorKey="mq135" value={latest?.mq135} />
-          <LiveDataCard isFlame value={latest?.flame} />
         </div>
       </section>
 
@@ -82,10 +78,8 @@ export default function DashboardTab({ latest, history }) {
         </div>
         <div className="gauges-grid">
           <GaugeChart sensorKey="temperature" value={latest?.temperature} />
-          <GaugeChart sensorKey="humidity" value={latest?.humidity} />
           <GaugeChart sensorKey="mq2" value={latest?.mq2} />
           <GaugeChart sensorKey="mq7" value={latest?.mq7} />
-          <GaugeChart sensorKey="mq135" value={latest?.mq135} />
         </div>
       </section>
 
@@ -100,11 +94,10 @@ export default function DashboardTab({ latest, history }) {
         </div>
         <div className="charts-grid">
           <SensorChart
-            title="Temperature & Humidity"
+            title="Temperature"
             data={history}
             lines={[
               { key: 'temperature', name: 'Temperature (°C)', color: '#f97316' },
-              { key: 'humidity', name: 'Humidity (%)', color: '#3b82f6' },
             ]}
           />
           <SensorChart
@@ -113,7 +106,6 @@ export default function DashboardTab({ latest, history }) {
             lines={[
               { key: 'mq2', name: 'MQ2 - Smoke', color: '#a855f7' },
               { key: 'mq7', name: 'MQ7 - CO', color: '#ec4899' },
-              { key: 'mq135', name: 'MQ135 - Air', color: '#06b6d4' },
             ]}
           />
         </div>
