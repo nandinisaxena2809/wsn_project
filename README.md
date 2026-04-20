@@ -22,6 +22,7 @@ WSN_PROJEC/
 │   ├── services/sensorService.js
 │   ├── .env
 │   ├── package.json
+|   ├── package-lock.json
 │   └── server.js
 ├── frontend/
 │   ├── src/
@@ -42,11 +43,14 @@ WSN_PROJEC/
 │   │   │   ├── api.js
 │   │   │   └── thresholds.js
 │   │   ├── App.jsx
+│   │   ├── App.css
 │   │   ├── index.css
 │   │   └── main.jsx
 │   ├── index.html
 │   └── vite.config.js
 └── hardware/
+    ├── arduino_sensor_reader.ino
+    ├── integrated_esp8266.ino
     └── nodemcu_sketch.ino          ← Upload to NodeMCU ESP8266
 ```
 
@@ -135,7 +139,7 @@ for ($i = 1; $i -le 20; $i++) {
 
 ```powershell
 # This will trigger DANGER alerts on the dashboard
-Invoke-RestMethod -Uri "http://localhost:5000/api/sensor-data" -Method Post -ContentType "application/json" -Body '{"temperature":65,"humidity":95,"mq2":600,"mq7":250,"mq135":500,"flame":true}'
+Invoke-RestMethod -Uri "http://localhost:5000/api/sensor-data" -Method Post -ContentType "application/json" -Body '{"temperature":65,"mq2":600,"mq7":250}'
 ```
 
 #### Check what's stored:
