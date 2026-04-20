@@ -47,7 +47,6 @@ WSN_PROJEC/
 │   ├── index.html
 │   └── vite.config.js
 └── hardware/
-    ├── arduino_sensor_reader.ino   ← Upload to Arduino Uno
     └── nodemcu_sketch.ino          ← Upload to NodeMCU ESP8266
 ```
 
@@ -161,7 +160,8 @@ Invoke-RestMethod -Uri "http://localhost:5000/api/sensor-data/history?limit=50"
 ┌───────────────────┐      WiFi (HTTP POST)    ┌──────────────────┐
 │  NodeMCU ESP8266  │ ──────────────────────── │  Your PC/Server  │
 │                   │  POST JSON every 5s      │  Express :5000   │
-│  Parses CSV       │                          │  MongoDB Atlas   │
+│  Reads sensors    |                          |                  |
+|    directly       │                          │  MongoDB Atlas   │
 │  Sends JSON       │                          │  React :5173     │
 └───────────────────┘                          └──────────────────┘
 ```
@@ -182,21 +182,21 @@ Invoke-RestMethod -Uri "http://localhost:5000/api/sensor-data/history?limit=50"
 
 ### Wiring Diagram
 
-#### Arduino Uno Sensor Connections:
+#### NodeMCU Sensor Connections:
 
 ```
-Sensor          NodeMCU Pin     Notes
-──────────────  ──────────────  ──────────────────────────
+Sensor          NodeMCU Pin     
+──────────────  ──────────────  
 DHT11 DATA   →  D1
 DHT11 VCC    →  3V
 DHT11 GND    →  GND
 
-MQ2   AOUT   →  Analog A0       Analog output
-MQ2   VCC    →  5V
+MQ2   AOUT   →  Analog A0       
+MQ2   VCC    →  Vin (or 5V external supply)
 MQ2   GND    →  GND
 
 MQ7   DOUT   →  D5             
-MQ7   VCC    →  5V
+MQ7   VCC    →  Vin (or 5V external supply)
 MQ7   GND    →  GND
 
 TEMP LED     →  D6             
@@ -257,8 +257,7 @@ GAS LED      →  D7
 | NodeMCU won't connect to WiFi | Double-check SSID and password. Make sure it's 2.4GHz (ESP8266 doesn't support 5GHz) |
 | Data not showing on dashboard | Check `SERVER_URL` — it must be your PC's LAN IP, not `localhost` |
 | "Connection refused" | Make sure backend is running and Windows Firewall allows port 5000 |
-| Garbled Serial data | Ensure both Arduino and NodeMCU use 9600 baud rate |
-| NodeMCU gets damaged | You forgot the voltage divider! Always use 10kΩ/20kΩ on TX→RX |
+| Garbled Serial data | Ensure NodeMCU use 115200 baud rate |
 
 **To allow port 5000 through Windows Firewall:**
 ```powershell
@@ -283,9 +282,8 @@ New-NetFirewallRule -DisplayName "Allow NodeMCU" -Direction Inbound -LocalPort 5
 ```json
 {
   "temperature": 30.5,
-  "humidity": 60.2,
   "mq2": 200,
-  "mq7": 150,
+  "mq7": 150
 }
 ```
 
@@ -296,7 +294,6 @@ New-NetFirewallRule -DisplayName "Allow NodeMCU" -Direction Inbound -LocalPort 5
 | Sensor | Warning | Danger |
 |--------|---------|--------|
 | Temperature | > 45°C | > 60°C |
-| Humidity | > 80% | > 95% |
 | MQ2 (Smoke) | > 300 ppm | > 500 ppm |
 | MQ7 (CO) | > 100 ppm | > 200 ppm |
 
