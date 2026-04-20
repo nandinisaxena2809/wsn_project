@@ -107,7 +107,7 @@ Open a **new terminal** and send fake sensor data to verify everything works:
 #### Single reading:
 
 ```powershell
-Invoke-RestMethod -Uri "http://localhost:5000/api/sensor-data" -Method Post -ContentType "application/json" -Body '{"temperature":32.5,"humidity":55,"mq2":180,"mq7":90,"mq135":250,"flame":false}'
+Invoke-RestMethod -Uri "http://localhost:5000/api/sensor-data" -Method Post -ContentType "application/json" -Body '{"temperature":32.5,"mq2":180,"mq7":90}'
 ```
 
 #### Simulate 20 continuous readings (like NodeMCU would):
@@ -291,11 +291,11 @@ New-NetFirewallRule -DisplayName "Allow NodeMCU" -Direction Inbound -LocalPort 5
 
 ## ⚠️ Alert Thresholds
 
-| Sensor | Warning | Danger |
-|--------|---------|--------|
-| Temperature | > 45°C | > 60°C |
-| MQ2 (Smoke) | > 300 ppm | > 500 ppm |
-| MQ7 (CO) | > 100 ppm | > 200 ppm |
+| Sensor | Condition | Status |
+|--------|-----------|--------|
+| Temperature | > 35°C | High Temperature ⚠️ |
+| MQ2 (Smoke/Gas) | > 300 (ADC value) | Gas Detected ⚠️ |
+| MQ7 (CO) | HIGH (1) | CO Detected ⚠️ |
 
 ---
 
