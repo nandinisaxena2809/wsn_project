@@ -205,23 +205,7 @@ GAS LED      →  D7
 
 ---
 
-### Step 1: Upload Arduino Code
-
-1. Open **Arduino IDE**
-2. Install the **DHT sensor library** by Adafruit:
-   - Go to: `Sketch → Include Library → Manage Libraries`
-   - Search: `DHT sensor library`
-   - Install it (by Adafruit)
-3. Open file: `hardware/arduino_sensor_reader.ino`
-4. Select: `Tools → Board → Arduino Uno`
-5. Select the correct COM port
-6. Click **Upload** ✓
-
-The Arduino will now read all sensors every 2 seconds and send CSV data via Serial.
-
----
-
-### Step 2: Upload NodeMCU Code
+### Step 1: Upload NodeMCU Code
 
 1. **Install ESP8266 board support** in Arduino IDE:
    - Go to: `File → Preferences`
@@ -231,9 +215,9 @@ The Arduino will now read all sensors every 2 seconds and send CSV data via Seri
      ```
    - Go to: `Tools → Board → Boards Manager`
    - Search: `esp8266` → Install
-2. **Install ArduinoJson library**:
+2. **Install required libraries**:
    - Go to: `Sketch → Include Library → Manage Libraries`
-   - Search: `ArduinoJson` (by Benoît Blanchon) → Install
+   - Search: `DHT sensor library` (by Adafruit) → Install
 3. Open file: `hardware/nodemcu_sketch.ino`
 4. **⚡ EDIT THESE 3 LINES:**
 
@@ -260,8 +244,8 @@ The Arduino will now read all sensors every 2 seconds and send CSV data via Seri
 1. Wire everything as shown above
 2. Start your backend: `cd backend && npm run dev`
 3. Start your frontend: `cd frontend && npm run dev`
-4. Power on the Arduino + NodeMCU
-5. **Both devices must be on the same WiFi network as your PC**
+4. Power on the NodeMCU
+5. **The device must be on the same WiFi network as your PC**
 6. Open `http://localhost:5173` and watch real sensor data appear!
 
 ---
@@ -302,8 +286,6 @@ New-NetFirewallRule -DisplayName "Allow NodeMCU" -Direction Inbound -LocalPort 5
   "humidity": 60.2,
   "mq2": 200,
   "mq7": 150,
-  "mq135": 300,
-  "flame": false
 }
 ```
 
@@ -317,8 +299,6 @@ New-NetFirewallRule -DisplayName "Allow NodeMCU" -Direction Inbound -LocalPort 5
 | Humidity | > 80% | > 95% |
 | MQ2 (Smoke) | > 300 ppm | > 500 ppm |
 | MQ7 (CO) | > 100 ppm | > 200 ppm |
-| MQ135 (Air) | > 200 ppm | > 400 ppm |
-| Flame | — | Detected |
 
 ---
 
