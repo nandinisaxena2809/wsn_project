@@ -3,7 +3,7 @@
 Real-time IoT sensor dashboard for fire and gas detection, built with Node.js, Express, MongoDB, Socket.IO, and React.
 
 ```
-Sensors → Arduino Uno → NodeMCU (ESP8266) → WiFi → Express Backend → MongoDB → React Dashboard
+Sensors → NodeMCU (ESP8266) → WiFi → Express Backend → MongoDB → React Dashboard
 ```
 
 ---
@@ -158,12 +158,12 @@ Invoke-RestMethod -Uri "http://localhost:5000/api/sensor-data/history?limit=50"
 ### Overview
 
 ```
-┌─────────────────┐      Serial (9600 baud)      ┌───────────────────┐      WiFi (HTTP POST)      ┌──────────────────┐
-│   Arduino Uno   │ ──────────────────────────── │  NodeMCU ESP8266  │ ──────────────────────── │  Your PC/Server  │
-│                 │  TX → RX (voltage divider)   │                   │  POST JSON every 5s     │  Express :5000   │
-│  Reads sensors  │  GND → GND                  │  Parses CSV       │                          │  MongoDB Atlas   │
-│  Sends CSV      │                              │  Sends JSON       │                          │  React :5173     │
-└─────────────────┘                              └───────────────────┘                          └──────────────────┘
+┌───────────────────┐      WiFi (HTTP POST)    ┌──────────────────┐
+│  NodeMCU ESP8266  │ ──────────────────────── │  Your PC/Server  │
+│                   │  POST JSON every 5s      │  Express :5000   │
+│  Parses CSV       │                          │  MongoDB Atlas   │
+│  Sends JSON       │                          │  React :5173     │
+└───────────────────┘                          └──────────────────┘
 ```
 
 ---
@@ -172,14 +172,10 @@ Invoke-RestMethod -Uri "http://localhost:5000/api/sensor-data/history?limit=50"
 
 | Component | Quantity | Purpose |
 |-----------|----------|---------|
-| Arduino Uno | 1 | Reads all sensors |
-| NodeMCU ESP8266 | 1 | WiFi gateway — sends data to server |
+| NodeMCU ESP8266 | 1 | Main controller + WiFi |
 | DHT11 | 1 | Temperature & humidity |
 | MQ2 Gas Sensor | 1 | Smoke / LPG / methane |
 | MQ7 Gas Sensor | 1 | Carbon monoxide (CO) |
-| MQ135 Gas Sensor | 1 | Air quality (NH3, NOx, CO2) |
-| Flame Sensor (IR) | 1 | Fire / flame detection |
-| 10kΩ + 20kΩ Resistors | 1 each | Voltage divider (5V→3.3V on Serial) |
 | Breadboard + Jumper Wires | Several | Connections |
 
 ---
@@ -189,46 +185,23 @@ Invoke-RestMethod -Uri "http://localhost:5000/api/sensor-data/history?limit=50"
 #### Arduino Uno Sensor Connections:
 
 ```
-Sensor          Arduino Pin     Notes
+Sensor          NodeMCU Pin     Notes
 ──────────────  ──────────────  ──────────────────────────
-DHT11 DATA   →  Digital Pin 2   + 10kΩ pull-up to 5V
-DHT11 VCC    →  5V
+DHT11 DATA   →  D1
+DHT11 VCC    →  3V
 DHT11 GND    →  GND
 
 MQ2   AOUT   →  Analog A0       Analog output
 MQ2   VCC    →  5V
 MQ2   GND    →  GND
 
-MQ7   AOUT   →  Analog A1       Analog output
+MQ7   DOUT   →  D5             
 MQ7   VCC    →  5V
 MQ7   GND    →  GND
 
-MQ135 AOUT   →  Analog A2       Analog output
-MQ135 VCC    →  5V
-MQ135 GND    →  GND
-
-Flame DO     →  Digital Pin 3   LOW = fire detected
-Flame VCC    →  5V
-Flame GND    →  GND
+TEMP LED     →  D6             
+GAS LED      →  D7
 ```
-
-#### Arduino → NodeMCU Serial Connection:
-
-```
-⚠️ IMPORTANT: NodeMCU is 3.3V! You MUST use a voltage divider on the Serial line.
-
-                    10kΩ
-Arduino TX ────────┤
-                    ├──────── NodeMCU RX (D7 or hardware RX)
-                   20kΩ
-                    ├──────── GND
-                    
-Arduino GND ──────────────── NodeMCU GND
-
-DO NOT connect Arduino TX directly to NodeMCU RX — it will damage the NodeMCU!
-```
-
-**Voltage divider formula:** Vout = 5V × (20kΩ / (10kΩ + 20kΩ)) = 3.3V ✓
 
 ---
 
