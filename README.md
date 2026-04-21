@@ -2,6 +2,7 @@
 
 Real-time IoT sensor dashboard for fire and gas detection, built with Node.js, Express, MongoDB, Socket.IO, and React.
 
+
 ```
 Sensors → NodeMCU (ESP8266) → WiFi → Express Backend → MongoDB → React Dashboard
 ```
@@ -53,6 +54,24 @@ WSN_PROJEC/
     ├── integrated_esp8266.ino
     └── nodemcu_sketch.ino          ← Upload to NodeMCU ESP8266
 ```
+
+---
+
+## 📸 Screenshots
+
+### 🔹 Dashboard Overview  
+<p align="center">
+  <img src="./frontend/src/assets/Screenshot 2026-04-19 230942.png" width="800"/>
+</p>
+
+
+
+### 🔹 Alerts System
+<p align="center">
+  <img src="./frontend/src/assets/Screenshot 2026-04-19 231035.png" width="800"/>
+</p>
+
+
 
 ---
 
