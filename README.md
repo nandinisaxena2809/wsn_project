@@ -64,13 +64,20 @@ WSN_PROJEC/
   <img src="./frontend/src/assets/Screenshot 2026-04-19 230942.png" width="800"/>
 </p>
 
-
+### 🔹 Analytics View
+<p align="center">
+  <img src="./frontend/src/assets/Screenshot 2026-04-19 231159.png" width="800"/>
+</p>
 
 ### 🔹 Alerts System
 <p align="center">
   <img src="./frontend/src/assets/Screenshot 2026-04-19 231035.png" width="800"/>
 </p>
 
+### 🔹 System Info Tab
+<p align="center">
+  <img src="./frontend/src/assets/Screenshot 2026-04-19 231051.png" width="800"/>
+</p>
 
 
 ---
