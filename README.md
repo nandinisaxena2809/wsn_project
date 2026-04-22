@@ -235,6 +235,119 @@ GAS LED      →  D7
 
 ---
 
+### Arduino IDE Code
+```cpp
+#include <ESP8266WiFi.h>
+#include <ESP8266HTTPClient.h>
+#include <WiFiClient.h>
+#include <DHT.h>
+
+/* -------- WiFi Config -------- */
+const char* WIFI_SSID     = "your-wifi-name";       // ← Your WiFi name
+const char* WIFI_PASSWORD = "your-wifi-password";      // ← Your WiFi password
+const char* SERVER_URL    = "http://192.168.x.x:5000/api/sensor-data";    // ← Your PC's LAN IP
+
+/* -------- Pins -------- */
+#define MQ2_PIN A0      // Analog
+#define MQ7_PIN D5      // Digital
+
+#define TEMP_LED D6
+#define GAS_LED  D7
+
+#define DHTPIN D1
+#define DHTTYPE DHT11
+
+DHT dht(DHTPIN, DHTTYPE);
+
+/* -------- Thresholds -------- */
+int gasThreshold = 300;
+float tempThreshold = 35;
+
+void setup() {
+  Serial.begin(115200);
+
+  pinMode(MQ7_PIN, INPUT);
+  pinMode(TEMP_LED, OUTPUT);
+  pinMode(GAS_LED, OUTPUT);
+
+  dht.begin();
+
+  /* -------- WiFi Connection -------- */
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  Serial.print("Connecting to WiFi");
+
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+
+  Serial.println("\nConnected to WiFi!");
+
+  Serial.println("System Started...");
+}
+
+void loop() {
+
+  /* -------- Read Sensors -------- */
+  int mq2 = analogRead(MQ2_PIN);
+  int mq7 = digitalRead(MQ7_PIN);
+  float temp = dht.readTemperature();
+
+  if (isnan(temp)) temp = 0;
+
+  /* -------- LED Logic -------- */
+
+  // Temperature LED
+  if (temp > tempThreshold)
+    digitalWrite(TEMP_LED, HIGH);
+  else
+    digitalWrite(TEMP_LED, LOW);
+
+  // Gas LED
+  if (mq2 > gasThreshold || mq7 == HIGH)
+    digitalWrite(GAS_LED, HIGH);
+  else
+    digitalWrite(GAS_LED, LOW);
+
+  /* -------- Serial Output -------- */
+  Serial.print("MQ2: ");
+  Serial.print(mq2);
+
+  Serial.print(" | MQ7: ");
+  Serial.print(mq7 == HIGH ? "Gas Detected" : "Safe");
+
+  Serial.print(" | Temp: ");
+  Serial.print(temp);
+  Serial.println(" °C");
+
+  /* -------- Send Data to Server -------- */
+  if (WiFi.status() == WL_CONNECTED) {
+    WiFiClient client;
+    HTTPClient http;
+
+    http.begin(client, SERVER_URL);
+    http.addHeader("Content-Type", "application/json");
+
+    String jsonData = "{";
+    jsonData += "\"mq2\":" + String(mq2) + ",";
+    jsonData += "\"mq7\":" + String(mq7) + ",";
+    jsonData += "\"temperature\":" + String(temp);
+    jsonData += "}";
+
+    int httpResponseCode = http.POST(jsonData);
+
+    Serial.print("HTTP Response: ");
+    Serial.println(httpResponseCode);
+
+    http.end();
+  }
+
+  delay(2000);
+}
+```
+
+---
+
 ### Step 1: Upload NodeMCU Code
 
 1. **Install ESP8266 board support** in Arduino IDE:
